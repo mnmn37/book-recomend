@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日の一冊</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --paper2: #ede6d6;
+    --accent: #8b3a1a;
+    --accent2: #c4813a;
+    --muted: #7a6e5f;
+    --border: #c8bfa8;
+    --red: #b5341e;
+  }
+
+  body {
+    font-family: 'Noto Serif JP', serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, #e8dfc8 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 100%, #ddd0b8 0%, transparent 50%);
+  }
+
+  /* ヘッダー */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 20px 32px 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 32px;
+    right: 32px;
+    height: 1px;
+    background: var(--ink);
+  }
+  .logo {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+  .logo-sub {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    font-weight: 300;
+  }
+  .date-badge {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+  }
+
+  /* レイアウト */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+  }
+
+  /* セクション共通 */
+  .section-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* オススメカード */
+  .recommend-section {
+    grid-column: 1 / -1;
+  }
+  .recommend-card {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .recommend-card::before {
+    content: '今日の一冊';
+    position: absolute;
+    top: 16px;
+    right: -30px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent2);
+    transform: rotate(90deg);
+    transform-origin: right center;
+    opacity: 0.6;
+  }
+  .recommend-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(196,129,58,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .rec-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent2);
+    font-weight: 300;
+  }
+  .rec-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: 0.05em;
+  }
+  .rec-author {
+    font-size: 14px;
+    color: #b8a98a;
+    letter-spacing: 0.1em;
+  }
+  .rec-reason {
+    font-size: 14px;
+    line-height: 1.9;
+    color: #c8bfa8;
+    max-width: 600px;
+    font-weight: 300;
+  }
+  .rec-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: auto;
+  }
+  .rec-tag {
+    font-size: 11px;
+    border: 1px solid rgba(196,129,58,0.4);
+    color: var(--accent2);
+    padding: 3px 10px;
+    letter-spacing: 0.1em;
+  }
+  .empty-rec {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    gap: 12px;
+    opacity: 0.5;
+  }
+  .empty-rec .empty-icon { font-size: 40px; }
+  .empty-rec p { font-size: 14px; letter-spacing: 0.1em; color: var(--paper); }
+
+  /* ボタン */
+  .btn-primary {
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    padding: 14px 28px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover { background: #6e2d13; }
+  .btn-primary:disabled { background: var(--muted); cursor: not-allowed; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* 設定パネル */
+  .settings-panel {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+
+  /* フォーム */
+  .form-group {
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  input[type="text"], select, textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    padding: 10px 12px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a6e5f'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+  }
+
+  /* 読書リスト */
+  .books-main {}
+  .book-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .book-list::-webkit-scrollbar { width: 4px; }
+  .book-list::-webkit-scrollbar-track { background: var(--paper2); }
+  .book-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .book-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    transition: border-color 0.2s;
+  }
+  .book-item:hover { border-color: var(--accent); border-left-color: var(--accent); }
+  .book-spine {
+    width: 4px;
+    height: 36px;
+    background: var(--accent2);
+    flex-shrink: 0;
+    display: none;
+  }
+  .book-info { flex: 1; min-width: 0; }
+  .book-title-text {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .book-meta {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+  .book-rating {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .star { color: var(--border); font-size: 12px; }
+  .star.filled { color: var(--accent2); }
+  .book-delete {
+    background: none;
+    border: none;
+    color: var(--border);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    flex-shrink: 0;
+    transition: color 0.2s;
+  }
+  .book-delete:hover { color: var(--red); }
+
+  /* 本追加フォーム */
+  .add-form {
+    background: var(--paper2);
+    border: 1px solid var(--border);
+    padding: 20px;
+  }
+  .add-form-title {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .rating-input {
+    display: flex;
+    gap: 4px;
+    padding: 10px 0;
+  }
+  .rating-star {
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--border);
+    transition: color 0.15s;
+  }
+  .rating-star.active { color: var(--accent2); }
+  .rating-star:hover { color: var(--accent2); }
+
+  /* トレンド設定 */
+  .trend-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .trend-opt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .trend-opt input[type="checkbox"] {
+    width: auto;
+    accent-color: var(--accent);
+  }
+  .genre-select { margin-top: 8px; }
+
+  /* ローディング */
+  .loading {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .loading.active { display: flex; }
+  .dots span {
+    display: inline-block;
+    animation: blink 1.2s infinite;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--accent2);
+  }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
+  }
+
+  /* アニメーション */
+  .fade-in {
+    animation: fadeIn 0.6s ease forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 空状態 */
+  .empty-books {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    border: 1px dashed var(--border);
+  }
+
+  /* エラー */
+  .error-msg {
+    font-size: 12px;
+    color: var(--red);
+    padding: 8px 12px;
+    border-left: 2px solid var(--red);
+    background: rgba(181,52,30,0.05);
+    margin-top: 8px;
+  }
+
+  @media (max-width: 700px) {
+    .container { grid-template-columns: 1fr; }
+    .recommend-card { padding: 24px; }
+    .rec-title { font-size: 22px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">今日の一冊</span>
+  <span class="logo-sub">BOOK RECOMMENDER</span>
+  <span class="date-badge" id="dateDisplay"></span>
+</header>
+
+<div class="container">
+
+  <!-- オススメカード（全幅） -->
+  <div class="recommend-section">
+    <div class="section-title">本日のレコメンド</div>
+    <div class="recommend-card" id="recommendCard">
+      <div class="empty-rec">
+        <div class="empty-icon">📖</div>
+        <p>読書記録を入力して「今日の一冊を選ぶ」を押してください</p>
+      </div>
+    </div>
+    <div style="margin-top:16px; display:flex; align-items:center; gap:16px;">
+      <button class="btn-primary" id="recommendBtn" onclick="getRecommendation()">
+        <span>✦</span> 今日の一冊を選ぶ
+      </button>
+      <div class="loading" id="loadingIndicator">
+        <div class="dots"><span>•</span><span>•</span><span>•</span></div>
+        <span>AIが選書中</span>
+      </div>
+    </div>
+    <div class="error-msg" id="errorMsg" style="display:none;margin-top:8px;"></div>
+  </div>
+
+  <!-- 読書記録 -->
+  <div class="books-main">
+    <div class="section-title">読書記録</div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:11px;color:var(--muted);letter-spacing:0.1em;" id="bookCount"></span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-secondary" onclick="importPastBooks()" id="importBtn" style="font-size:11px;padding:6px 14px;border-color:var(--accent2);color:var(--accent2);">
+          ✦ 過去の読了本を一括インポート（348冊）
+        </button>
+        <button class="btn-secondary" onclick="clearAllBooks()" style="font-size:11px;padding:6px 14px;">
+          全削除
+        </button>
+      </div>
+    </div>
+
+    <div class="book-list" id="bookList">
+      <div class="empty-books" id="emptyBooks">まだ読書記録がありません</div>
+    </div>
+
+    <!-- 追加フォーム -->
+    <div class="add-form">
+      <div class="add-form-title">▸ 本を追加</div>
+      <div class="form-group">
+        <label>タイトル</label>
+        <input type="text" id="inputTitle" placeholder="書名を入力">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>著者</label>
+          <input type="text" id="inputAuthor" placeholder="著者名">
+        </div>
+        <div class="form-group">
+          <label>ジャンル</label>
+          <select id="inputGenre">
+            <option value="">選択してください</option>
+            <option>小説・文学</option>
+            <option>ミステリー・サスペンス</option>
+            <option>SF・ファンタジー</option>
+            <option>歴史・時代小説</option>
+            <option>恋愛小説</option>
+            <option>エッセイ・随筆</option>
+            <option>ビジネス・経済</option>
+            <option>自己啓発</option>
+            <option>科学・技術</option>
+            <option>哲学・思想</option>
+            <option>人文・社会</option>
+            <option>絵本・児童文学</option>
+            <option>コミック・マンガ</option>
+            <option>その他</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>評価（読んだ感想）</label>
+        <div class="rating-input" id="ratingInput">
+          <span class="rating-star" data-v="1" onclick="setRating(1)">★</span>
+          <span class="rating-star" data-v="2" onclick="setRating(2)">★</span>
+          <span class="rating-star" data-v="3" onclick="setRating(3)">★</span>
+          <span class="rating-star" data-v="4" onclick="setRating(4)">★</span>
+          <span class="rating-star" data-v="5" onclick="setRating(5)">★</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>一言メモ（任意）</label>
+        <input type="text" id="inputMemo" placeholder="感想・キーワードなど">
+      </div>
+      <button class="btn-secondary" onclick="addBook()">＋ 追加する</button>
+    </div>
+  </div>
+
+  <!-- 設定パネル -->
+  <div class="settings-panel">
+    <div class="section-title">トレンド設定</div>
+
+    <div class="trend-options">
+      <label class="trend-opt">
+        <input type="checkbox" id="useWebSearch" checked>
+        AIがWeb検索でトレンドを取得
+      </label>
+      <label class="trend-opt">
+        <input type="checkbox" id="useManualGenre" checked>
+        注目してほしいジャンルを指定
+      </label>
+    </div>
+
+    <div id="manualGenreArea">
+      <div class="form-group genre-select">
+        <label>注目ジャンル（複数選択可）</label>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;" id="genreChecks">
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">
+
+    <div class="section-title">気分・条件</div>
+    <div class="form-group">
+      <label>今日の気分・読みたいテーマ（任意）</label>
+      <input type="text" id="moodInput" placeholder="例：癒やされたい、挑戦したい…">
+    </div>
+
+    <div class="form-group">
+      <label>除外したいジャンル（任意）</label>
+      <input type="text" id="excludeInput" placeholder="例：ホラー、難解な哲学書…">
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---- データ ----
+let books = JSON.parse(localStorage.getItem('booklog') || '[]');
+
+// 過去の読了本データ（348冊）
+const PAST_BOOKS = [{"id": 1776222971953, "title": "安楽死が合法の国で起こっていること", "author": "", "genre": "哲学・思想", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971954, "title": "人魚が逃げた", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971955, "title": "スピノザの診察室", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971956, "title": "発達障害&グレーゾーンの子の「できた!」がふえる おうち学習サポート大全", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971957, "title": "本なら売るほど 2", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971958, "title": "本なら売るほど 1", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971959, "title": "赤ちゃんに転生した話(4)", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971960, "title": "笑わない数学", "author": "", "genre": "科学・技術", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971961, "title": "舞妓さんちのまかないさん 30", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971962, "title": "舞妓さんちのまかないさん 29", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971963, "title": "「子どもが賢くなる75の方法」", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971964, "title": "教育は遺伝に勝てるか？", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971965, "title": "赤と青のガウン", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971966, "title": "ハネチンとブッキーのお子さま診療録 3", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971967, "title": "ハネチンとブッキーのお子さま診療録 2", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971968, "title": "ハネチンとブッキーのお子さま診療録 1", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971969, "title": "子どもの脳を傷つける親がやっていること", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971970, "title": "MOE 2025年11月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971971, "title": "最新版 歌舞伎の解剖図鑑", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971972, "title": "ネオ・ネグレクト", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971973, "title": "キノの旅XXIV", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971974, "title": "【新版】日本語の作文技術", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971975, "title": "H02 ハプスブルク帝国", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971976, "title": "ゆかいな神統記 2", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971977, "title": "ゆかいな神統記 1", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971978, "title": "1人でできる子になるテキトー子育て", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971979, "title": "GOOD INSIDE", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971980, "title": "THE CHILD CODE", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971981, "title": "MOE 2025年10月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971982, "title": "「強み」を生み出す育て方", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971983, "title": "移動と階級", "author": "", "genre": "哲学・思想", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971984, "title": "国宝 下", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971985, "title": "国宝 上", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971986, "title": "世界秩序が変わるとき", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971987, "title": "「個性」と「才能」が伸びる シュタイナー式子育て", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971988, "title": "MOE 2025年9月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971989, "title": "別冊100分de名著 集中講義 旧約聖書", "author": "", "genre": "哲学・思想", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971990, "title": "MOE 2025年8月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971991, "title": "MOE 2025年7月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971992, "title": "MOE 2025年6月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971993, "title": "村上春樹『ねじまき鳥クロニクル』4月", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971994, "title": "子どもは動きながら学ぶ", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971995, "title": "魔法のピットインカード", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971996, "title": "チェックリストでわかる 実務家、企業のためのスタートアップ法務", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971997, "title": "スタートアップ法務", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971998, "title": "まるごとぜんぶ北摂の本", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222971999, "title": "MOE 2025年5月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972000, "title": "本の江戸文化講義", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972001, "title": "蔦屋重三郎の時代", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972002, "title": "ママがいい!", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972003, "title": "ことばの学習のパラドックス", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972004, "title": "赤と青とエスキース", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972005, "title": "生きづらさの民俗学", "author": "", "genre": "哲学・思想", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972006, "title": "MOE 2025年4月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972007, "title": "大規模言語モデルは新たな知能か", "author": "", "genre": "科学・技術", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972008, "title": "0-5歳児 発達応援あそび", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972009, "title": "0-5歳児 絵本あそび", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972010, "title": "0-5歳児 文字・数あそび", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972011, "title": "わたしたちが27歳だったころ", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972012, "title": "1万5000人のデータに基づいた すごい身長の伸ばし方", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972013, "title": "２万人を測定してわかった！ 子どもの成長は足が９割", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972014, "title": "医者が教える疲れない人の脳", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972015, "title": "深層学習の原理に迫る", "author": "", "genre": "科学・技術", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972016, "title": "ケースブック大学発ベンチャー創出のエコシステム", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972017, "title": "NO.6 完全ガイド", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972018, "title": "火狩りの王 〈一〉春ノ火", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972019, "title": "舞妓さんちのまかないさん 28", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972020, "title": "舞妓さんちのまかないさん 27", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972021, "title": "舞妓さんちのまかないさん 26", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972022, "title": "舞妓さんちのまかないさん 25", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972023, "title": "舞妓さんちのまかないさん 24", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972024, "title": "舞妓さんちのまかないさん 23", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972025, "title": "春夏秋冬代行者 黄昏の射手", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972026, "title": "春夏秋冬代行者 百歌百葉 2", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972027, "title": "春夏秋冬代行者 百歌百葉 1", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972028, "title": "MOE 2025年3月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972029, "title": "ベンチャーキャピタルの実務", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972030, "title": "インキュベーション・ネクスト", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972031, "title": "子どもの幸せは腸が7割", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972032, "title": "MOE 2025年2月号", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972033, "title": "クレパスではじめる！0〜3歳の身近な世界が世界にひらくお絵かき", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972034, "title": "世界秩序", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972035, "title": "「頭のよさ」テスト", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972036, "title": "ナショナリズムとは何か", "author": "", "genre": "哲学・思想", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972037, "title": "DTOPIA", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972038, "title": "成瀬は信じた道をいく", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972039, "title": "成瀬は天下を取りにいく", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972040, "title": "思いどおりになんて育たない", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972041, "title": "神の嫁、舞う天子", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972042, "title": "「地震」と「火山」の国に暮らす", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972043, "title": "教育不足", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972044, "title": "ちいさい言語学者の冒険", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972045, "title": "世界で一番美しい人体図鑑", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972046, "title": "目から脳の幼児教育", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972047, "title": "地球は日時計", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972048, "title": "人生リセット旅", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972049, "title": "子どもの食べているもので、全ての運命が変わる", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972050, "title": "夜と霧", "author": "", "genre": "哲学・思想", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972051, "title": "子どもの脳が変わる 自分の親に読んでほしかった本", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972052, "title": "べらぼう〜蔦重栄華乃夢噺〜", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972053, "title": "藍を継ぐ海", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972054, "title": "どっちの子育て？", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972055, "title": "十二支がまるごとわかる本", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972056, "title": "kodomoe 2026年2月", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972057, "title": "紫式部とその時代", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972058, "title": "赤ちゃんに転生した話(3)", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972059, "title": "整形外科医が教える 家族の体を守る医学的おそうじ", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972060, "title": "カリスマ・ナニーが教える 1・2・3歳児のしつけ", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972061, "title": "0歳から5歳までの絵本とおもちゃでゆっくり子育て", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972062, "title": "デュアルキャリア・カップル", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972063, "title": "KATZマンガでわかるファイナンス", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972064, "title": "見てすぐわかる犯罪地図", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972065, "title": "武政権の女たち", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972066, "title": "子どもの非認知能力は防げる！", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972067, "title": "52ヘルツのクジラたち", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972068, "title": "15分! PCTから学ぶ 0〜3歳の心の育て方", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972069, "title": "プリンス・オブ・モーション", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972070, "title": "知りたいこと図鑑", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972071, "title": "小児の頭蓋健診・治療ハンドブック", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972072, "title": "ピースメーカー 天海", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972073, "title": "ディープブック理休", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972074, "title": "この1冊でわかる IRの基本", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972075, "title": "ダブルエージェント", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972076, "title": "暮忍桜化行者 秋の舞 上", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972077, "title": "暮忍桜化行者 秋の舞 下", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972078, "title": "ダ・ヴィンチ 2024年3月", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972079, "title": "虹いろ図書館のひきこもり5分前", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972080, "title": "暮忍桜化行者 萌の軌", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972081, "title": "暮忍桜化行者 夏の雫 上", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972082, "title": "暮忍桜化行者 夏の雫 下", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972083, "title": "賢い子は1歳までの眠りで決まる", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972084, "title": "改訂版 カリスマ・ナニーが教える 赤ちゃんとおかあさんの快眠講座", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972085, "title": "家族をつなぐ ぐっすり眠れる片づけ", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972086, "title": "天才脳をつくる0歳教育", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972087, "title": "頭がいい子の家のリビングには必ず「辞書」がある", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972088, "title": "0歳からの歯育て", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972089, "title": "おいしいごはんが食べられますように", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972090, "title": "奇書の世界史", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972091, "title": "夜に星を放つ", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972092, "title": "逆説の日本史 4 中世鳴動編", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972093, "title": "推し、燃ゆ", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972094, "title": "教場", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972095, "title": "世界のビジネスエリートが今すぐに始める 教養としてのノンフィクション", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972096, "title": "世界にはいまでも戦争があって、そこで生まれた子どもたちがいる。", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972097, "title": "サクッとわかるビジネス教養 地政学", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972098, "title": "会計クイズを解くだけで財務3表がわかる本", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972099, "title": "逆説の日本史 2 古代編", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972100, "title": "逆説の日本史 1 古代黎明編", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972101, "title": "楽天IR戦記", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972102, "title": "文在寅という災厄", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972103, "title": "バランスシート不況", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972104, "title": "悪のAI論", "author": "", "genre": "科学・技術", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972105, "title": "外資系金融の終わり", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972106, "title": "蜜蜂と遠雷 下", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972107, "title": "大世界史", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972108, "title": "生涯投資家", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972109, "title": "蜜蜂と遠雷 上", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972110, "title": "ヒトラーとゲインズバラ", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972111, "title": "未来の年表 1", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972112, "title": "経済と金融の世界史", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972113, "title": "FACTFULNESS", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972114, "title": "完全独習 統計学入門", "author": "", "genre": "科学・技術", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972115, "title": "ビジネスモデル2.0図鑑", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972116, "title": "経済は地理から学べ！", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972117, "title": "イノベーターのジレンマの経済学的解明 上", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972118, "title": "イノベーターのジレンマの経済学的解明 下", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972119, "title": "すぐれた脳に育てる！", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972120, "title": "赤ちゃん教育", "author": "", "genre": "子育て・教育", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972121, "title": "外資系金融のExcel作成術", "author": "", "genre": "ビジネス・経済", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972122, "title": "入社1年目の教科書", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972123, "title": "プラチナデータ", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972124, "title": "未来の年表 2", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972125, "title": "ゆっくり、いそげ", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972126, "title": "神様のカルテ 0", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972127, "title": "神様のカルテ 2", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972128, "title": "神様のカルテ 3", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972129, "title": "神様のカルテ", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972130, "title": "チーム・バチスタの栄光 下", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972131, "title": "チーム・バチスタの栄光 上", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972132, "title": "ナイチンゲールの沈黙 下", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972133, "title": "ナイチンゲールの沈黙 上", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972134, "title": "ジェネラル・ルージュの凱旋 下", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972135, "title": "ジェネラル・ルージュの凱旋 上", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972136, "title": "アリアドネの弾丸", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972137, "title": "イノセント・ゲリラの祝祭 上", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972138, "title": "イノセント・ゲリラの祝祭 下", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972139, "title": "螺鈿迷宮 上", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972140, "title": "螺鈿迷宮 下", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972141, "title": "ジーン・ワルツ", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972142, "title": "ブラックペアン1988", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972143, "title": "マドンナ・ヴェルデ", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972144, "title": "極北ラプソディ", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972145, "title": "極北クレイマー", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972146, "title": "医学のたまご", "author": "", "genre": "医療・小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972147, "title": "星の王子さま", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972148, "title": "少年H 上巻", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972149, "title": "少年H 下巻", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972150, "title": "永遠の0", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972151, "title": "火車", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972152, "title": "傲慢と善良", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972153, "title": "光圀伝", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972154, "title": "天地明察 上", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972155, "title": "天地明察 下", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972156, "title": "ブラックボックス", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972157, "title": "羊と鋼の森", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972158, "title": "フリーター、家を買う。", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972159, "title": "シアター! 2", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972160, "title": "シアター!", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972161, "title": "ヒア・カムズ・ザ・サン", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972162, "title": "県庁おもてなし課", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972163, "title": "図書館戦争", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972164, "title": "図書館内乱", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972165, "title": "図書館革命", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972166, "title": "図書館危機", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972167, "title": "別冊図書館戦争 2", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972168, "title": "レインツリーの国", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972169, "title": "明日の子供たち", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972170, "title": "キャロリング", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972171, "title": "三匹のおっさん", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972172, "title": "三匹のおっさん ふたたび", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972173, "title": "ストーリー・セラー", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972174, "title": "キケン", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972175, "title": "君の膵臓をたべたい", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972176, "title": "植物図鑑", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972177, "title": "旅猫リポート", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972178, "title": "倒れるときは前のめり", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972179, "title": "空飛ぶ広報室", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972180, "title": "阪急電車", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972181, "title": "空の中", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972182, "title": "海の底", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972183, "title": "塩の街", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972184, "title": "クジラの彼", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972185, "title": "アイネクライネナハトムジーク", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972186, "title": "博士の愛した数式", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972187, "title": "楽園のカンヴァス", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972188, "title": "銀河鉄道の夜", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972189, "title": "ごころ", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972190, "title": "逆ソクラテス", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972191, "title": "か「」く「」し「」ご「」と「", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972192, "title": "君の膵臓をたべたい 双葉文庫版", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972193, "title": "謎解きはディナーのあとで", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972194, "title": "謎解きはディナーのあとで 2", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972195, "title": "謎解きはディナーのあとで 3", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972196, "title": "女のいない男たち", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972197, "title": "ノルウェイの森 上", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972198, "title": "ノルウェイの森 下", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972199, "title": "色彩を持たない多崎つくると、彼の巡礼の年", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972200, "title": "風に舞いあがるビニールシート", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972201, "title": "食堂かたつむり", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972202, "title": "告白", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972203, "title": "向日葵の咲かない夏", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972204, "title": "ぼくは明日、昨日のきみとデートする", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972205, "title": "イニシエーション・ラブ", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972206, "title": "青の数学", "author": "", "genre": "科学・技術", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972207, "title": "僕が愛したすべての君へ", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972208, "title": "君を愛したひとりの僕へ", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972209, "title": "いなくなれ、群青", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972210, "title": "NO.6 #1", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972211, "title": "バッテリー", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972212, "title": "リズム", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972213, "title": "カラフル", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972214, "title": "DIVE!! 上", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972215, "title": "DIVE!! 下", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972216, "title": "獣の奏者 1 闘蛇編", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972217, "title": "獣の奏者 2 王獣編", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972218, "title": "獣の奏者 3 探求編", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972219, "title": "獣の奏者 4 完結編", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972220, "title": "月の影 影の海 上", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972221, "title": "月の影 影の海 下", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972222, "title": "風の万里 黎明の空 上", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972223, "title": "風の万里 黎明の空 下", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972224, "title": "東の海神 西の滄海", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972225, "title": "図南の翼", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972226, "title": "華胥の幽夢", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972227, "title": "黄昏の岸 暁の天", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972228, "title": "白銀の墟 玄の月 第一巻", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972229, "title": "白銀の墟 玄の月 第二巻", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972230, "title": "白銀の墟 玄の月 第三巻", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972231, "title": "白銀の墟 玄の月 第四巻", "author": "", "genre": "SF・ファンタジー", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972232, "title": "彩雲国物語 黄金の約束", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972233, "title": "彩雲国物語 想われ君は朽ちせず", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972234, "title": "彩雲国物語 隣の百合は白", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972235, "title": "彩雲国物語 心は藍よりも深く", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972236, "title": "彩雲国物語 緑風は刃のごとく", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972237, "title": "彩雲国物語 朱にまじわれば紅", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972238, "title": "彩雲国物語 青嵐にゆれる月草", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972239, "title": "彩雲国物語 白虹は天をめざす", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972240, "title": "彩雲国物語 黒蝶は檻にとらわれる", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972241, "title": "彩雲国物語 紅梅は夜に香る", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972242, "title": "彩雲国物語 蒼き迷宮の巫女", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972243, "title": "彩雲国物語 紫闇の玉座 上", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972244, "title": "彩雲国物語 紫闇の玉座 下", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972245, "title": "彩雲国物語 はじまりの風は紅く", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972246, "title": "わたしの幸せな結婚 1", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972247, "title": "わたしの幸せな結婚 2", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972248, "title": "わたしの幸せな結婚 3", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972249, "title": "わたしの幸せな結婚 4", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972250, "title": "わたしの幸せな結婚 8", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972251, "title": "真夜中のパン屋さん 午前0時のレシピ", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972252, "title": "真夜中のパン屋さん 午前1時の来客", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972253, "title": "真夜中のパン屋さん 午前2時の転校生", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972254, "title": "真夜中のパン屋さん 午前3時のおやつ", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972255, "title": "真夜中のパン屋さん 午前4時の共犯者", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972256, "title": "真夜中のパン屋さん 午前5時の朝告鳥", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972257, "title": "伯爵と妖精 あいつは優雅な大悪党", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972258, "title": "身代わり伯爵の冒険", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972259, "title": "身代わり伯爵と出逢えたら結婚も薔薇色", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972260, "title": "拝啓見知らぬ旦那様、離婚していただきます", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972261, "title": "拝啓見知らぬ旦那様、離婚したいわたしを愛さないでください", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972262, "title": "婚約者に忘れられたら歴史女ですので婚活します", "author": "", "genre": "歴史・時代小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972263, "title": "魔力なし令嬢ですが、旦那様は王国No.1の鑑定士", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972264, "title": "無能令嬢の契約結婚", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972265, "title": "ノーブルチルドレンの追想", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972266, "title": "ノーブルチルドレンの愛情", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972267, "title": "ノーブルチルドレンの断罪", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972268, "title": "ノーブルチルドレンの告別", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972269, "title": "ノーブルチルドレンの残酷", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972270, "title": "ノーブルチルドレンの勇気", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972271, "title": "ノーブルチルドレンの愛魔", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972272, "title": "ノーブルチルドレンの愚鈍", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972273, "title": "ノーブルチルドレンの永遠", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972274, "title": "ノーブルチルドレンの音楽", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972275, "title": "ハトムギの幸せな結婚〜おひとりさまなので婚カツしてみました〜", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972276, "title": "トワイライト 上", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972277, "title": "トワイライト 下", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972278, "title": "トワイライト II 上", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972279, "title": "トワイライト II 下", "author": "", "genre": "恋愛小説", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972280, "title": "走れ! T校バスケット部 7", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972281, "title": "走れ! T校バスケット部 6", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972282, "title": "走れ! T校バスケット部 5", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972283, "title": "走れ! T校バスケット部 4", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972284, "title": "走れ! T校バスケット部 3", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972285, "title": "走れ! T校バスケット部 2", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972286, "title": "走れ! T校バスケット部 1", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972287, "title": "もし高校野球の女子マネージャーがドラッカーの『マネジメント』を読んだら", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972288, "title": "ダ・ヴィンチ・コード 上", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972289, "title": "ダ・ヴィンチ・コード 中", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972290, "title": "ダ・ヴィンチ・コード 下", "author": "", "genre": "エッセイ・随筆", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972291, "title": "ロスト・シンボル 上", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972292, "title": "ロスト・シンボル 中", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972293, "title": "ロスト・シンボル 下", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972294, "title": "浜村渚の計算ノート 5 さつじん水色コンパス", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972295, "title": "浜村渚の計算ノート 4 さつじん北斎は知っている", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972296, "title": "浜村渚の計算ノート 3 つるかめ算幻の冥府", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972297, "title": "浜村渚の計算ノート 2 ふしぎの国の期末テスト", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972298, "title": "浜村渚の計算ノート 1 さつじん高気圧の魔女", "author": "", "genre": "ミステリー・サスペンス", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972299, "title": "オレたちバブル入行組", "author": "", "genre": "小説・文学", "rating": 0, "memo": "", "date": "インポート"}, {"id": 1776222972300, "title": "オレたち花のバブル組", "author": "", "genre": "その他", "rating": 0, "memo": "", "date": "インポート"}];
+let currentRating = 0;
+const genres = ['小説・文学','ミステリー・サスペンス','SF・ファンタジー','歴史・時代小説','恋愛小説','エッセイ・随筆','ビジネス・経済','自己啓発','科学・技術','哲学・思想'];
+
+// 初期化
+(function init() {
+  const d = new Date();
+  document.getElementById('dateDisplay').textContent =
+    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
+
+  // ジャンルチェックボックス生成
+  const gc = document.getElementById('genreChecks');
+  genres.forEach(g => {
+    const label = document.createElement('label');
+    label.className = 'trend-opt';
+    label.innerHTML = `<input type="checkbox" class="genre-cb" value="${g}"> ${g}`;
+    gc.appendChild(label);
+  });
+
+  // チェックボックス連動
+  document.getElementById('useManualGenre').addEventListener('change', e => {
+    document.getElementById('manualGenreArea').style.display = e.target.checked ? '' : 'none';
+  });
+
+  renderBooks();
+})();
+
+// ---- 読書記録 ----
+function setRating(v) {
+  currentRating = v;
+  document.querySelectorAll('.rating-star').forEach((s, i) => {
+    s.classList.toggle('active', i < v);
+  });
+}
+
+function addBook() {
+  const title = document.getElementById('inputTitle').value.trim();
+  if (!title) { alert('タイトルを入力してください'); return; }
+  const book = {
+    id: Date.now(),
+    title,
+    author: document.getElementById('inputAuthor').value.trim(),
+    genre: document.getElementById('inputGenre').value,
+    rating: currentRating,
+    memo: document.getElementById('inputMemo').value.trim(),
+    date: new Date().toLocaleDateString('ja-JP')
+  };
+  books.unshift(book);
+  localStorage.setItem('booklog', JSON.stringify(books));
+  // リセット
+  ['inputTitle','inputAuthor','inputMemo'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('inputGenre').value = '';
+  setRating(0);
+  renderBooks();
+}
+
+function deleteBook(id) {
+  books = books.filter(b => b.id !== id);
+  localStorage.setItem('booklog', JSON.stringify(books));
+  renderBooks();
+}
+
+function renderBooks() {
+  const list = document.getElementById('bookList');
+  const empty = document.getElementById('emptyBooks');
+  const countEl = document.getElementById('bookCount');
+  if (countEl) countEl.textContent = books.length > 0 ? `${books.length}冊` : '';
+  if (books.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    return;
+  }
+  list.innerHTML = books.map(b => `
+    <div class="book-item fade-in">
+      <div class="book-info">
+        <div class="book-title-text">${escHtml(b.title)}</div>
+        <div class="book-meta">${[b.author, b.genre, b.date].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="book-rating">${'★'.repeat(b.rating || 0).split('').map(s=>`<span class="star filled">${s}</span>`).join('')}${'★'.repeat(5-(b.rating||0)).split('').map(s=>`<span class="star">${s}</span>`).join('')}</div>
+      <button class="book-delete" onclick="deleteBook(${b.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+function importPastBooks() {
+  if (books.length > 0) {
+    if (!confirm(`現在の記録（${books.length}冊）に348冊を追加します。よろしいですか？`)) return;
+  } else {
+    if (!confirm('過去の読了本348冊をインポートします。よろしいですか？')) return;
+  }
+  // 重複チェック（タイトルで）
+  const existingTitles = new Set(books.map(b => b.title));
+  const newBooks = PAST_BOOKS.filter(b => !existingTitles.has(b.title));
+  books = [...newBooks, ...books];
+  localStorage.setItem('booklog', JSON.stringify(books));
+  renderBooks();
+  const btn = document.getElementById('importBtn');
+  btn.textContent = `✓ インポート済み（${newBooks.length}冊追加）`;
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
+}
+
+function clearAllBooks() {
+  if (!confirm(`読書記録（${books.length}冊）をすべて削除しますか？`)) return;
+  books = [];
+  localStorage.setItem('booklog', JSON.stringify(books));
+  renderBooks();
+  const btn = document.getElementById('importBtn');
+  btn.textContent = '✦ 過去の読了本を一括インポート（348冊）';
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ---- AIレコメンド ----
+async function getRecommendation() {
+  const btn = document.getElementById('recommendBtn');
+  const loading = document.getElementById('loadingIndicator');
+  const errMsg = document.getElementById('errorMsg');
+  errMsg.style.display = 'none';
+
+  if (books.length === 0) {
+    errMsg.textContent = '読書記録を少なくとも1冊入力してください';
+    errMsg.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  loading.classList.add('active');
+
+  // 設定を収集
+  const useWeb = document.getElementById('useWebSearch').checked;
+  const useManual = document.getElementById('useManualGenre').checked;
+  const selectedGenres = useManual
+    ? [...document.querySelectorAll('.genre-cb:checked')].map(c => c.value)
+    : [];
+  const mood = document.getElementById('moodInput').value.trim();
+  const exclude = document.getElementById('excludeInput').value.trim();
+
+  // プロンプト構築
+  const bookSummary = books.slice(0, 15).map(b =>
+    `・「${b.title}」${b.author ? `（${b.author}）` : ''}${b.genre ? `[${b.genre}]` : ''}${b.rating ? ` 評価:${b.rating}/5` : ''}${b.memo ? ` メモ:${b.memo}` : ''}`
+  ).join('\n');
+
+  const trendInstruction = useWeb
+    ? '最近の日本の書籍トレンド・ベストセラー・話題作を考慮してください。'
+    : '';
+  const genreInstruction = selectedGenres.length > 0
+    ? `特に注目してほしいジャンル：${selectedGenres.join('、')}` : '';
+  const moodInstruction = mood ? `今日の気分・テーマ：${mood}` : '';
+  const excludeInstruction = exclude ? `除外してほしいもの：${exclude}` : '';
+
+  const tools = useWeb ? [{
+    "type": "web_search_20250305",
+    "name": "web_search"
+  }] : [];
+
+  const prompt = `あなたは優れた選書家・書店員です。
+ユーザーの読書履歴を分析し、今日のオススメの1冊を選んでください。
+
+【読書記録】
+${bookSummary}
+
+【条件】
+${trendInstruction}
+${genreInstruction}
+${moodInstruction}
+${excludeInstruction}
+
+以下のJSON形式のみで回答してください（マークダウンやコードブロック不要）：
+{
+  "title": "書名",
+  "author": "著者名",
+  "genre": "ジャンル",
+  "reason": "この本をオススメする理由（読書履歴との関連、今日読むべき理由を含む150字程度）",
+  "tags": ["タグ1", "タグ2", "タグ3"]
+}`;
+
+  try {
+    const body = {
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      messages: [{ role: "user", content: prompt }]
+    };
+    if (tools.length > 0) body.tools = tools;
+
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    // テキストブロックを抽出
+    let text = '';
+    for (const block of (data.content || [])) {
+      if (block.type === 'text') text += block.text;
+    }
+
+    // JSONをパース
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('JSONが見つかりません');
+    const rec = JSON.parse(jsonMatch[0]);
+
+    renderRecommendation(rec);
+  } catch (e) {
+    errMsg.textContent = `エラーが発生しました：${e.message}`;
+    errMsg.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    loading.classList.remove('active');
+  }
+}
+
+function renderRecommendation(rec) {
+  const card = document.getElementById('recommendCard');
+  card.innerHTML = `
+    <div class="rec-label fade-in">✦ TODAY'S PICK</div>
+    <div>
+      <div class="rec-title fade-in">${escHtml(rec.title)}</div>
+      <div class="rec-author fade-in">${escHtml(rec.author || '')}${rec.genre ? ` ／ ${escHtml(rec.genre)}` : ''}</div>
+    </div>
+    <div class="rec-reason fade-in">${escHtml(rec.reason || '')}</div>
+    <div class="rec-tags fade-in">
+      ${(rec.tags || []).map(t => `<span class="rec-tag">${escHtml(t)}</span>`).join('')}
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
